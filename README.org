@@ -1,0 +1,53 @@
+* mirror-rmk2
+
+
+An application to mirror the remarkable2 tablet on the pc.
+
+** Usage
+
+** Development
+*** Requirements
+
+*** Linux, MacOS, and Windows (WSL2)
+
+- direnv
+- nix (https://nixos.org/download/#nix-install-linux)
+
+*** Windows (non WSL2)
+
+- java
+- clojure (https://clojure.org/guides/install_clojure#_windows_instructions)
+- babashka (https://github.com/babashka/babashka?tab=readme-ov-file#windows)
+
+
+*** One-time setup
+
+On Linux, MacOS, and Windows (WSL2):
+#+begin_src shell
+direnv allow
+#+end_src
+
+To make sure that no unformatted commits with lint errors end up in the
+main branch run initially:
+#+begin_src shell
+git config core.hooksPath hooks
+#+end_src
+
+Scriptul `pre-push` will block the push if there are style or lint
+errors in code.
+
+
+*** REPL
+
+** Deploy
+
+
+** Resources
+
+
+** Tasks
+
+
+** License
+
+=mirror-rmk2= is released under the GNU General Public License. See the [[file:LICENSE][file]] for details.

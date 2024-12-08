@@ -1,0 +1,57 @@
+{:paths ["src" "resources"]
+
+ :deps {org.clojure/clojure {:mvn/version "1.11.4"}
+
+        aero/aero                   {:mvn/version "1.1.6"}
+        com.fzakaria/slf4j-timbre   {:mvn/version "0.4.0"}
+        com.taoensso/timbre         {:mvn/version "6.2.2"}
+        integrant/integrant         {:mvn/version "0.8.1"}
+        io.github.nextjournal/clerk {:mvn/version "0.16.1016"}
+        org.slf4j/slf4j-api         {:mvn/version "2.0.9"}
+        org.slf4j/slf4j-nop         {:mvn/version "2.0.9"}
+        origami/origami             {:mvn/version "4.9.0-8"}
+        }
+
+ :aliases
+ {:dev      {:extra-paths ["dev/src" "dev/resources"]
+             :extra-deps  {integrant/repl      {:mvn/version "0.3.3"}
+                           criterium/criterium {:mvn/version "0.4.6"}}} 
+  :nrepl    {:extra-deps
+             {cider/cider-nrepl             {:mvn/version "0.49.3"}
+              refactor-nrepl/refactor-nrepl {:mvn/version "3.10.0"}
+              org.clojure/tools.deps.alpha  {:git/url "https://github.com/clojure/tools.deps.alpha"
+                                             :sha     "5b8909bdb072d66c9f643bae50cd2878a0f694c2"}
+              nrepl/nrepl                   {:mvn/version "1.0.0"}}
+             :main-opts
+             ["-m" "nrepl.cmdline"
+              "--middleware" "[cider.nrepl/cider-middleware refactor-nrepl.middleware/wrap-refactor]"
+              "-i"]}
+  :test     {:extra-paths ["test/src" "test/resources"]
+             :extra-deps
+             {lambdaisland/kaocha         {:mvn/version "1.91.1392"}
+              kaocha-noyoda/kaocha-noyoda {:mvn/version "2019-06-03"}
+              org.clojure/test.check      {:mvn/version "1.1.1"}
+              com.gfredericks/test.chuck  {:mvn/version "0.2.14"}}
+             :jvm-opts    ["-XX:-OmitStackTraceInFastThrow"]
+             :main-opts   ["-m" "kaocha.runner"]
+             :exec-fn     kaocha.runner/exec-fn
+             :exec-args   {:randomize? true
+                           :fail-fast? false}}
+  :outdated {:replace-paths ["."]
+             :replace-deps
+             {com.github.liquidz/antq {:mvn/version "RELEASE"}
+              org.slf4j/slf4j-nop     {:mvn/version "2.0.16"}}
+             :main-opts     ["-m" "antq.core"]
+             :exec-fn       antq.tool/outdated
+             :exec-args     {:directory ["."]       ; default
+                             :exclude   ["org.clojure/tools.deps.alpha"]
+                             :reporter  "table"     ; json edn format
+                             :verbose   false
+                             :upgrade   false
+                             :force     false}}
+  :neil     {:project {:name    cljproj 
+                       :version "0.1"}}
+  ;; added by neil
+  :build    {:deps       {io.github.clojure/tools.build {:git/tag "v0.9.4" :git/sha "76b78fe"}
+                          slipset/deps-deploy           {:mvn/version "0.2.0"}}
+             :ns-default build}}}

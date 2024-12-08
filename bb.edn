@@ -1,0 +1,31 @@
+{:paths ["src"]
+ :tasks
+ {nrepl     {:doc  "Starts the REPL"
+             :task (clojure "-M:test:dev:nrepl")}
+  kondo     {:doc  "Runs kondo linter on default or specific file"
+             :task (let [[src-file] *command-line-args*]
+                     (shell (str "clj-kondo --lint "
+                                 (if (empty? src-file)
+                                   "src test"
+                                   src-file))))}
+  style     {:doc  "Checks code style on default or specific file"
+             :task (let [[src-file] *command-line-args*]
+                     (shell (str "cljstyle check "
+                                 (if (empty? src-file)
+                                   "src test resources"
+                                   src-file))))}
+  format    {:doc  "Formats codebase on default or specific file"
+             :task (let [[src-file] *command-line-args*]
+                     (shell  (str "cljstyle fix "
+                                  (if (empty? src-file)
+                                    "src test resources"
+                                    src-file))))}
+  test      {:doc  "Runs tests (using kaocha)"
+             :task (let [[tst-ns] *command-line-args*]
+                     (clojure (str "-M:test"
+                                   (when-not (empty? tst-ns) (str " --focus " tst-ns)))))}
+  libupdate {:doc  "Check for newer libraries"
+             :task (clojure "-X:outdated")}
+  deploy    {:doc  "Build and deploy jar"
+             :task (clojure "-T:build deploy")}
+  }}
