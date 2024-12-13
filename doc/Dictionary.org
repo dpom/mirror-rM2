@@ -1,0 +1,9 @@
+#+TITLE: Dictionary
+#+DESCRIPTION: project dictionary
+#+AUTHOR: Dan Pomohaci
+#+EMAIL: dan.pomohaci@gmail.com
+#+STARTUP: overview indent align inlineimages
+
+- trace :: a stylus action, a map with the keys :x, :y, :pen, :pres
+- tracer :: trace the stylus actions
+- renderer :: copy the tablet screen

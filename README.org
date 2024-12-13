@@ -8,19 +8,19 @@ An application to mirror the remarkable2 tablet on the pc.
 ** Development
 *** Requirements
 
-*** Linux, MacOS, and Windows (WSL2)
+**** Linux, MacOS, and Windows (WSL2)
 
 - direnv
 - nix (https://nixos.org/download/#nix-install-linux)
 
-*** Windows (non WSL2)
+**** Windows (non WSL2)
 
 - java
 - clojure (https://clojure.org/guides/install_clojure#_windows_instructions)
 - babashka (https://github.com/babashka/babashka?tab=readme-ov-file#windows)
 
 
-*** One-time setup
+**** One-time setup
 
 On Linux, MacOS, and Windows (WSL2):
 #+begin_src shell
@@ -33,9 +33,8 @@ main branch run initially:
 git config core.hooksPath hooks
 #+end_src
 
-Scriptul `pre-push` will block the push if there are style or lint
+The ~pre-push~ script will block the push if there are style or lint
 errors in code.
-
 
 *** REPL
 
@@ -45,8 +44,25 @@ errors in code.
 ** Resources
 
 
+1. https://datatracker.ietf.org/doc/html/rfc6143
+2. https://github.com/ichaozi/RemarkableFramebuffer
+3. https://github.com/canselcik/libremarkable/wiki/Reading-Physical-Buttons
+4. https://github.com/clj-commons/clj-ssh
+5. https://circleci.com/blog/build-a-clojure-web-app-using-duct/
+6. https://github.com/duct-framework/duct
+7. https://github.com/juxt/edge
+8. https://github.com/thi-ng/geom
+9. https://practicalli.github.io/blog/posts/clojure-web-server-cli-tools-deps-edn/
+10. https://github.com/Raynes/conch
+11. [[http://blog.felixbreuer.net/2010/12/20/pengl.html][Digital Ink with Clojure and OpenGL]]
+12. [[https://github.com/AnyTimeTraveler/pipes-and-rust][AnyTimeTraveler/pipes-and-rust]]
+
+
+
 ** Tasks
 
+*** Create project scafold
+*** Bring the code from the old project 
 
 ** License
 

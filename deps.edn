@@ -1,27 +1,36 @@
 {:paths ["src" "resources"]
 
- :deps {org.clojure/clojure {:mvn/version "1.11.4"}
-
-        aero/aero                   {:mvn/version "1.1.6"}
-        com.fzakaria/slf4j-timbre   {:mvn/version "0.4.0"}
-        com.taoensso/timbre         {:mvn/version "6.2.2"}
-        integrant/integrant         {:mvn/version "0.8.1"}
-        io.github.nextjournal/clerk {:mvn/version "0.16.1016"}
-        org.slf4j/slf4j-api         {:mvn/version "2.0.9"}
-        org.slf4j/slf4j-nop         {:mvn/version "2.0.9"}
-        origami/origami             {:mvn/version "4.9.0-8"}
+ :deps {org.clojure/clojure            {:mvn/version "1.12.0"}
+        aero/aero                      {:mvn/version "1.1.6"}
+        aleph/aleph                    {:mvn/version "0.8.1"}
+        byte-streams/byte-streams      {:mvn/version "0.2.5-alpha2"}
+        clj-commons/conch              {:mvn/version "0.9.2"}
+        com.fzakaria/slf4j-timbre      {:mvn/version "0.4.1"}
+        com.taoensso/timbre            {:mvn/version "6.6.1"}
+        duct/logger                    {:mvn/version "0.3.0"}
+        duct/logger.timbre             {:mvn/version "0.5.0"}
+        integrant/integrant            {:mvn/version "0.13.1"}
+        io.github.nextjournal/clerk    {:mvn/version "0.17.1102"}
+        manifold/manifold              {:mvn/version "0.4.3"}
+        org.clojure/core.async         {:mvn/version "1.6.681"}
+        org.clojure/math.numeric-tower {:mvn/version "0.1.0"}
+        org.slf4j/slf4j-api            {:mvn/version "2.0.16"}
+        org.slf4j/slf4j-nop            {:mvn/version "2.0.16"}
+        origami/origami                {:mvn/version "4.9.0-8"}
+        quil/quil                      {:mvn/version "4.3.1563"}
+        tick/tick                      {:mvn/version "1.0"}
         }
 
  :aliases
  {:dev      {:extra-paths ["dev/src" "dev/resources"]
-             :extra-deps  {integrant/repl      {:mvn/version "0.3.3"}
+             :extra-deps  {integrant/repl      {:mvn/version "0.4.0"}
                            criterium/criterium {:mvn/version "0.4.6"}}} 
   :nrepl    {:extra-deps
-             {cider/cider-nrepl             {:mvn/version "0.49.3"}
+             {cider/cider-nrepl             {:mvn/version "0.50.3"}
               refactor-nrepl/refactor-nrepl {:mvn/version "3.10.0"}
               org.clojure/tools.deps.alpha  {:git/url "https://github.com/clojure/tools.deps.alpha"
                                              :sha     "5b8909bdb072d66c9f643bae50cd2878a0f694c2"}
-              nrepl/nrepl                   {:mvn/version "1.0.0"}}
+              nrepl/nrepl                   {:mvn/version "1.3.0"}}
              :main-opts
              ["-m" "nrepl.cmdline"
               "--middleware" "[cider.nrepl/cider-middleware refactor-nrepl.middleware/wrap-refactor]"
@@ -49,9 +58,7 @@
                              :verbose   false
                              :upgrade   false
                              :force     false}}
-  :neil     {:project {:name    cljproj 
+  :neil     {:project {:name    mirror-rmk2 
                        :version "0.1"}}
-  ;; added by neil
-  :build    {:deps       {io.github.clojure/tools.build {:git/tag "v0.9.4" :git/sha "76b78fe"}
-                          slipset/deps-deploy           {:mvn/version "0.2.0"}}
-             :ns-default build}}}
+  }
+ }

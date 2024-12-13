@@ -1,0 +1,21 @@
+{
+ :mirror/main {:tracer #ig/ref :mirror/tracer
+               :renderer #ig/ref :mirror/renderer
+               :logger #ig/ref :duct/logger}
+
+ ;; :mirror.tracer/event {:server "remarkable"
+ ;;                       :logger #ig/ref :duct/logger}
+
+ :mirror.tracer/file {:logger #ig/ref :duct/logger}
+
+ :mirror.renderer/screen {:logger #ig/ref :duct/logger}
+
+ ;; :mirror.renderer/file {:filename "test/resources/test.ev"
+ ;;                        :logger #ig/ref :duct/logger}
+
+ [:duct/logger :duct.logger/timbre] {:level #profile {:prod :info
+                                                      :dev  :debug
+                                                      :test :info}
+                                     :appenders {:println #ig/ref :duct.logger.timbre/println}}
+
+ :duct.logger.timbre/println {}}

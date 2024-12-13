@@ -1,0 +1,44 @@
+#+TITLE: SoftwareSpec
+#+DESCRIPTION: specificatiile software
+#+AUTHOR: Dan Pomohaci
+#+EMAIL: dan.pomohaci@gmail.com
+#+STARTUP: overview indent align inlineimages
+
+* Scop
+
+    - aceasta aplicație trebuie să fie o oglindă a remarkable pe laptop
+    - tot ce scriu sau desenez pe remarkable ar trebui să apară în timp real în aplicația pe laptop inclusiv stersăturile
+
+* Implementare
+
+- aplicatie clojure folosind integrant
+- componente:
+  - tracer :: urmăreste miscările făcute pe remarkable
+  - render :: randează miscările
+  - logger :: logging - folosesc =duct.logger=
+- pentru comunicarea dintre cele 2 componente principale am folosit manifold stream
+- nu vreau să folosesc records așa că nu o să folosesc nici protocols
+- oricum pâna acum nu am decât o singură functii în boundary: get-stream
+- de fapt nu am nevoie de o funcție pt ca toate componentele principale folosesc aceeași key =:stream= pt stream
+- programul principal trebuie doar sa conecteze stream-ul de la rederer la stream-ul tracer-ului
+
+** mirror.tracer.event
+
+- este componenta care urmăreste miscările stilus pe remarkable
+- se conectează prin ssh la remarkable și citeste toate mesajele de la =/dev/input/event1=
+- parametru de intrare:
+  - server :: adresa remarkable
+
+** mirror.tracer.file
+
+    - pentru a nu folosi de fiecare dată remarkable am implementat o componentă care citeste events stilus dintr-un fisier
+    - modulul implementează functia:
+      - trace! [filename] :: trimite către stream toate events memorate în fisierul filename
+
+** mirror.renderer.file
+
+- renderer care salvează Events într-un fisier
+- parametru de intrare:
+  - filename :: numele fișierului în care se salvează events
+
+** mirror.renderer.screen
