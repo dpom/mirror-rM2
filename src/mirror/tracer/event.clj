@@ -47,12 +47,12 @@
   [:sync 0])
 
 
-(defmethod format-event abs-type [[_ code val]]
-  [(get abs-codes code :noop) val])
+(defmethod format-event abs-type [[_ code v]]
+  [(get abs-codes code :noop) v])
 
 
-(defmethod format-event key-type [[_ code val]]
-  [(get key-codes code :noop) val])
+(defmethod format-event key-type [[_ code v]]
+  [(get key-codes code :noop) v])
 
 
 (defn noop?
@@ -68,14 +68,14 @@
 (defn format-raw-event
   "Extract usefull infor from a raw event"
   [event]
-  (let [type (get event 8)
+  (let [t (get event 8)
         code (+ (get event 10)
                 (* (get event 11) 0x100))
-        val  (+ (get event 12)
-                (* (get event 13) 0x100)
-                (* (get event 14) 0x10000)
-                (* (get event 15) 0x1000000))]
-    [type code val]))
+        v  (+ (get event 12)
+              (* (get event 13) 0x100)
+              (* (get event 14) 0x10000)
+              (* (get event 15) 0x1000000))]
+    [t code v]))
 
 
 (defn format-events

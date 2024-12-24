@@ -18,6 +18,6 @@
 
 (defn prep
   [profile]
-  (let [config (config profile)]
-    (ig/load-namespaces config)
+  (let [conf (config profile)]
+    (ig/load-namespaces conf)
     config))

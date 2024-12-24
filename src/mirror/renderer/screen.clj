@@ -11,6 +11,7 @@
     (processing.core
       PApplet)))
 
+
 (def ig-key :mirror.renderer/screen)
 
 (derive ig-key :mirror/renderer)
@@ -19,9 +20,11 @@
 (def background 255)
 (def color 0)
 
+
 (def colors
   {:pen color
    :rubber background})
+
 
 (defn scale
   [x max-x]
@@ -30,8 +33,10 @@
     x))
 
 
-(def screen {:width (scale sch/max-y 0)
-             :height (scale sch/max-x 0)})
+(def screen
+  {:width (scale sch/max-y 0)
+   :height (scale sch/max-x 0)})
+
 
 ;; state
 
@@ -42,6 +47,7 @@
   (reset! (:current-line state) {:tool nil :points []})
   (reset! (:in-line? state) false))
 
+
 (defn process-event!
   [{:keys [lines current-point current-line in-line?] :as state}
    {:keys [pen x y rubber]}]
@@ -50,8 +56,7 @@
       (do
         (swap! lines conj @current-line)
         (reset! current-line {:tool nil :points []})
-        (reset! in-line? false)
-        )
+        (reset! in-line? false))
       (do
         (reset! current-point [(or (scale y 0) (first @current-point))
                                (or (scale x sch/max-x) (second @current-point))])
@@ -79,10 +84,12 @@
   (q/stroke-weight 1)
   (q/smooth))
 
+
 (defn clean
   [state]
   (init-state! state)
   (setup))
+
 
 (defn ui-key-press
   [state]
@@ -94,6 +101,7 @@
       \c (clean state)
       nil)))
 
+
 (defn draw-line
   [{:keys [tool points]}]
   (q/stroke (get colors tool color))
@@ -101,7 +109,8 @@
     (apply q/line pair)))
 
 
-(defn draw [{:keys [lines in-line? current-line]}]
+(defn draw
+  [{:keys [lines in-line? current-line]}]
   (doseq [l @lines]
     (draw-line l))
   (when @in-line?
@@ -116,8 +125,8 @@
     :setup #'setup
     :draw #(draw state)
     :key-pressed #(ui-key-press state)
-    :middleware [qm/pause-on-error])
-  )
+    :middleware [qm/pause-on-error]))
+
 
 ;; integrant methods
 
@@ -135,6 +144,7 @@
      :state state
      :logger logger
      :skatch (create-sketch state)}))
+
 
 (defmethod ig/halt-key! ig-key [_ sys]
   (let [{:keys [stream logger skatch]} sys]

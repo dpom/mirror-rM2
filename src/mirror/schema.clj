@@ -1,8 +1,5 @@
-(ns mirror.schema
-  (:require
-    [malli.core :as m]
-    [malli.generator :as mg]
-    ))
+(ns mirror.schema)
+
 
 (def max-x 20967)
 
@@ -12,22 +9,26 @@
 
 (def Y [:int {:min 0 :max max-y}])
 
+
 (def Point
   [:tuple #'X #'Y])
 
+
 (def Event
-[:map
- [:x {:optional true} #'X]
- [:y {:optional true} #'Y]
- [:pres {:optional true} int?]
- [:pen {:optional true} [:enum 0 1]]
- [:rubber {:optional true} [:enum 0 1]]
- [:touch {:optional true} [:enum 0 1]]])
+  [:map
+   [:x {:optional true} #'X]
+   [:y {:optional true} #'Y]
+   [:pres {:optional true} int?]
+   [:pen {:optional true} [:enum 0 1]]
+   [:rubber {:optional true} [:enum 0 1]]
+   [:touch {:optional true} [:enum 0 1]]])
+
 
 (def Line
   [:map
    [:type [:enum :pen :rubber]]
    [:points [:vector #'Point]]])
+
 
 (def State
   [:map
@@ -38,6 +39,10 @@
 
 
 (comment
+  (require
+    '[malli.core :as m]
+    '[malli.generator :as mg])
+  
   (mg/generate X)
   ;; => 11653
   (mg/generate Y)
