@@ -4,3 +4,363 @@
 #+EMAIL: dan.pomohaci@gmail.com
 #+STARTUP: overview indent align inlineimages
 #+PROPERTY: header-args :cache yes :results silent :padline no
+
+* 2024-12-14
+
+- incerc sa-mi aduc aminte ce am implementat :)
+  #+begin_src clojure
+(require
+  '[integrant.core :as ig]
+  '[mirror.tracer.event :as ev]
+  '[duct.logger :refer [log]]
+  '[duct.logger.timbre]
+  '[manifold.stream :as stm])
+
+(def config
+  {:mirror.tracer/event              {:server "remarkable"
+                                      :logger (ig/ref :duct/logger)}
+   [:duct/logger :duct.logger/timbre] {:level  :debug
+                                       :appenders {:println (ig/ref :duct.logger.timbre/println)}}
+   :duct.logger.timbre/println        {}})
+
+(def system
+  (ig/init config))
+
+(def tracer (:mirror.tracer/event system))
+
+(def s1 (:stream tracer))
+
+(def logger (:logger tracer))
+
+(def s2 (stm/stream))
+
+(stm/consume #(log logger :debug ::consume %) s2)
+
+(stm/connect s1 s2)
+
+(stm/downstream s1)
+(stm/downstream s2)
+
+;; reset
+
+(defn save-event
+  [file logger event]
+  (log logger :debug ::save-event event)
+  (spit file (str event) :append true))
+
+(def sav-ev (partial save-event "test.ev" logger))
+
+(stm/consume sav-ev s2)
+
+(stm/connect s1 s2)
+  #+end_src
+  tracer functioneaza
+
+  
+* 2024-12-17
+
+- actualizez cunostiintele de quil:
+  #+begin_src clojure
+(ns quil-intro
+  (:require [quil.core :as q]))
+
+;; define function which draws spiral
+(defn draw []
+  ;; make background white
+  (q/background 255)
+
+  ;; move origin point to centre of the sketch
+  ;; by default origin is in the left top corner
+  (q/with-translation [(/ (q/width) 2) (/ (q/height) 2)]
+    ;; parameter t goes 0, 0.01, 0.02, ..., 99.99, 100
+    (doseq [t (range 0 100 0.01)]
+      ;; draw a point with x = t * sin(t) and y = t * cos(t)
+      (q/point (* t (q/sin t))
+               (* t (q/cos t))))))
+
+;; run sketch
+(q/defsketch trigonometry
+  :size [600 600]
+  :draw draw)
+
+;; animation
+;; you can get awesome plots using random combinations of trigonometric functions
+;; here f which plots a flower
+(defn f [t]
+  (let [r (* 200 (q/sin t) (q/cos t))]
+    [(* r (q/sin (* t 0.2)))
+     (* r (q/cos (* t 0.2)))]))
+
+
+(defn draw []
+  (q/with-translation [(/ (q/width) 2) (/ (q/height) 2)]
+    ;; note that we don't use draw-plot here as we need
+    ;; to draw only small part of a plot on each iteration
+    (let [t (/ (q/frame-count) 10)]
+      (q/line (f t)
+              (f (+ t 0.1))))))
+
+;; 'setup' is a cousin of 'draw' function
+;; setup initialises sketch and it is called only once
+;; before draw called for the first time
+(defn setup []
+  ;; draw will be called 60 times per second
+  (q/frame-rate 60)
+  ;; set background to white colour only in the setup
+  ;; otherwise each invocation of 'draw' would clear sketch completely
+  (q/background 255))
+
+(q/defsketch trigonometry
+  :size [300 300]
+  :setup setup
+  :draw draw)
+  #+end_src
+
+* 2024-12-22
+
+- am inlocuit spec cu malli
+  #+begin_src clojure
+(require
+  '[malli.core :as m]
+  '[malli.generator :as mg])
+
+(def max-x 20967)
+
+(def X [:int {:min 0 :max max-x}])
+
+(mg/generate X)
+;; => 11653
+
+(def max-y 15725)
+
+(def Y [:int {:min 0 :max max-y}])
+
+(mg/generate Y)
+;; => 53
+
+(def Point
+  [:map
+   [:x #'X]
+   [:y #'Y]])
+
+(mg/generate Point)
+;; => {:x 15496, :y 1365}
+
+(def Event
+  [:map
+   [:x {:optional true} #'X]
+   [:y {:optional true} #'Y]
+   [:pres {:optional true} int?]
+   [:pen {:optional true} [:enum 0 1]]
+   [:rubber {:optional true} [:enum 0 1]]])
+
+(def Line
+  [:map
+   [:type [:enum :pen :rubber]]
+   [:points [:vector #'Point]]])
+  #+end_src
+
+* 2024-12-23
+
+- refactor render
+  #+begin_src clojure
+(require
+  '[quil.core :as q]
+  '[mirror.schema :as sch]
+  '[quil.middleware :as qm])
+
+(def scale-value 25.0)
+(def background 255)
+(def color 0)
+
+(def colors
+  {:pen color
+   :rubber background})
+
+(defn scale
+  [x]
+  (Math/round (float (/ x scale-value))))
+
+(def screen {:width (scale sch/max-y)
+             :height (scale sch/max-x)})
+
+(def state
+  {:lines (atom [])})
+
+(def pause? (atom false))
+
+(defn setup
+  []
+  (q/frame-rate 6) ; draw will be called 60 times per second
+  (q/background 255)
+  (q/stroke-weight 1)
+  (q/smooth))
+
+
+(defn toggle-pause
+  [p?]
+  (if @p?
+    (q/no-loop)
+    (q/start-loop))
+  (swap! p? not))
+
+(defn clean
+  [st]
+  (reset! (:lines st) [])
+  (setup))
+
+(defn ui-key-press
+  [st p?]
+  (let  [raw-key (q/raw-key)
+         key-code (q/key-code)]
+    (tap> {:raw-key raw-key
+           :key-code key-code})
+    (case raw-key
+      \space (toggle-pause  p?)
+      \c (clean st))))
+
+(defn draw-line
+  [{:keys [tool points]}]
+  (q/stroke (get colors tool color))
+  (doseq [pair (partition 2 1 points)]
+    (apply q/line pair)))
+
+
+(defn draw [{:keys [lines]}]
+  (doseq [l @lines]
+    (draw-line l)))
+
+(q/sketch
+  :title "mirror"
+  :size [(:width screen) (:height screen)]
+  :setup #'setup
+  :draw #(draw state)
+  :key-pressed #(ui-key-press state pause?)
+  :middleware [qm/pause-on-error])
+
+(reset! (:lines state)
+        [{:tool :pen
+          :points [[10 10] [12 12] [15 15]]}])
+  #+end_src
+
+* 2024-12-24
+
+- continui refactorizarea:
+  #+begin_src clojure
+(use '[mirror.renderer.screen])
+
+(def state
+  {:lines (atom [])
+   :current-point (atom [])
+   :current-line (atom {:tool nil :points []})
+   :in-line? (atom false)})
+
+(create-sketch state)
+
+(reset! (:lines state)
+        [{:tool :pen
+          :points [[10 10] [12 12] [15 15]]}])
+
+(scale nil 0)
+;; => nil
+
+(require '[mirror.schema :as sch])
+
+(defn process-event!
+  [{:keys [lines current-point current-line in-line?] :as state}
+   {:keys [pen x y rubber]}]
+  (if @in-line?
+    (if (or (= pen 0) (= rubber 0))
+      (do
+        (swap! lines conj @current-line)
+        (reset! current-line {:tool nil :points []})
+        (reset! in-line? false)
+        )
+      (do
+        (reset! current-point [(or (scale y 0) (first @current-point))
+                               (or (scale x sch/max-x) (second @current-point))])
+        (swap! current-line assoc :points (dedupe (conj (:points @current-line) @current-point)))
+        (tap> @current-line)))
+    (cond
+      (= pen 1) (do
+                  (reset! in-line? true)
+                  (reset! current-point [(scale y 0) (scale x sch/max-x)])
+                  (reset! current-line {:tool :pen :points [@current-point]}))
+      (= rubber 1) (do
+                     (reset! in-line? true)
+                     (reset! current-point [(scale y 0) (scale x sch/max-x)])
+                     (reset! current-line {:tool :rubber :points [@current-point]}))
+      :else nil))
+  state)
+
+(require '[clojure.java.io :as io])
+(require '[clojure.edn :as edn])
+
+(defn load-edn
+  "Given an edn filename, load & return the clojure entitity"
+  [filename]
+  (edn/read-string (slurp filename)))
+
+(def events (load-edn "test.ev"))
+(count events)
+;; => 60552
+
+(defn process-file!
+  [state filename]
+  (let [events (load-edn filename)]
+    (doseq [e events]
+      (process-event! state e))))
+
+(process-file! state "test.ev")
+
+(first events)
+;; => {:pen 1, :x 16868, :y 12883}
+
+(process-event! state (first events))
+
+state
+
+(dedupe (conj [[1 2] [2 3]] [2 3]))
+;; => ([1 2] [2 3])
+
+(def events1 [{:pen 1, :x 17884, :y 2923}
+              {:x 17885}
+              {:x 17886, :y 2922}
+              {:pen 0}
+              {:pen 1, :x 17568, :y 4482}
+              {:x 17569}
+              {:x 17570, :y 4481}
+              {:pen 0}
+              {:rubber 1, :x 18028, :y 3265}
+              {:x 18029, :y 3266}
+              {:y 3267}
+              {:x 18036, :y 3292, :pres 758}
+              {:touch 1, :x 18038, :pres 1142}
+              {:x 18047, :y 3291, :pres 954}
+              {:touch 0, :pres 0}
+              {:x 18051, :y 3771}
+              {:x 18052, :y 3775}
+              {:rubber 0}
+              {:pen 1, :x 17558, :y 2861}
+              {:x 17559}
+              {:y 2860}
+              {:touch 0, :pres 0}
+              {:x 17931, :y 3926}
+              {:x 17937, :y 3930}
+              {:pen 0}])
+
+(process-event! state (nth events1 2))
+(doseq [e events1]
+  (process-event! state e))
+
+(def state
+  {:lines (atom [])
+   :current-point (atom [])
+   :current-line (atom {:tool nil :points []})
+   :in-line? (atom false)})
+
+(create-sketch state)
+
+
+(process-file! state "test/resources/test1.ev")
+  #+end_src

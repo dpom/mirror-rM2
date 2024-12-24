@@ -10,13 +10,11 @@
         duct/logger                    {:mvn/version "0.3.0"}
         duct/logger.timbre             {:mvn/version "0.5.0"}
         integrant/integrant            {:mvn/version "0.13.1"}
-        io.github.nextjournal/clerk    {:mvn/version "0.17.1102"}
         manifold/manifold              {:mvn/version "0.4.3"}
+        metosin/malli                  {:mvn/version "0.17.0"}
         org.clojure/core.async         {:mvn/version "1.6.681"}
         org.clojure/math.numeric-tower {:mvn/version "0.1.0"}
         org.slf4j/slf4j-api            {:mvn/version "2.0.16"}
-        org.slf4j/slf4j-nop            {:mvn/version "2.0.16"}
-        origami/origami                {:mvn/version "4.9.0-8"}
         quil/quil                      {:mvn/version "4.3.1563"}
         tick/tick                      {:mvn/version "1.0"}
         }

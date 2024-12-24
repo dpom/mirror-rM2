@@ -1,0 +1,77 @@
+
+Remarkable has a Wacom I2C Digitizer. This doc describes the events supported by this digitizer.
+
+* Dictionary of terms
+
+- X, Y :: coordinates in pixels
+- distance :: height above the tablet surface (also noted with Z)
+- pressure :: the pressure with which the stylus is pressed
+- XTilt, YTilt :: the plane angle made by the stylus on the ZX and ZY axes respectively
+
+* Supported events
+
+- Event type 0 (Sync)
+- Event type 1 (Key)
+  - Event code 320 (ToolPen)
+  - Event code 321 (ToolRubber)
+  - Event code 330 (Touch)
+  - Event code 331 (Stylus)
+  - Event code 332 (Stylus2)
+- Event type 3 (Absolute)
+  - Event code 0 (X)
+    - Value   7509
+    - Min        0
+    - Max    20967
+  - Event code 1 (Y)
+    - Value  11277
+    - Min        0
+    - Max    15725
+  - Event code 24 (Pressure)
+    - Value      0
+    - Min        0
+    - Max     4095
+  - Event code 25 (Distance)
+    - Value     62
+    - Min        0
+    - Max      255
+  - Event code 26 (XTilt)
+    - Value      0
+    - Min    -9000
+    - Max     9000
+  - Event code 27 (YTilt)
+    - Value      0
+    - Min    -9000
+    - Max     9000
+
+* Example
+
+#+begin_example
+Event: time 1519455612.131963, -------------- Report Sync ------------
+Event: time 1519455612.138317, type 3 (Absolute), code 0 (X), value 6536
+Event: time 1519455612.138317, type 3 (Absolute), code 25 (Distance), value 49
+Event: time 1519455612.138317, -------------- Report Sync ------------
+Event: time 1519455612.141944, type 3 (Absolute), code 0 (X), value 6562
+Event: time 1519455612.141944, type 3 (Absolute), code 1 (Y), value 9457
+Event: time 1519455612.141944, type 3 (Absolute), code 25 (Distance), value 54
+Event: time 1519455612.141944, -------------- Report Sync ------------
+Event: time 1519455612.148315, type 3 (Absolute), code 0 (X), value 6590
+Event: time 1519455612.148315, type 3 (Absolute), code 1 (Y), value 9456
+Event: time 1519455612.148315, type 3 (Absolute), code 25 (Distance), value 60
+Event: time 1519455612.148315, -------------- Report Sync ------------
+Event: time 1519455612.151963, type 3 (Absolute), code 0 (X), value 6617
+Event: time 1519455612.151963, type 3 (Absolute), code 1 (Y), value 9454
+Event: time 1519455612.151963, type 3 (Absolute), code 25 (Distance), value 67
+Event: time 1519455612.151963, -------------- Report Sync ------------
+Event: time 1519455612.158320, type 3 (Absolute), code 0 (X), value 6645
+Event: time 1519455612.158320, type 3 (Absolute), code 1 (Y), value 9452
+Event: time 1519455612.158320, type 3 (Absolute), code 25 (Distance), value 74
+Event: time 1519455612.158320, -------------- Report Sync ------------
+Event: time 1519455612.161156, type 3 (Absolute), code 0 (X), value 6669
+Event: time 1519455612.161156, type 3 (Absolute), code 1 (Y), value 9449
+Event: time 1519455612.161156, -------------- Report Sync ------------
+Event: time 1519455612.167466, type 3 (Absolute), code 0 (X), value 6688
+Event: time 1519455612.167466, type 3 (Absolute), code 1 (Y), value 9446
+Event: time 1519455612.167466, -------------- Report Sync ------------
+Event: time 1519455612.181232, type 1 (Key), code 320 (ToolPen), value 0
+Event: time 1519455612.181232, -------------- Report Sync ------------
+#+end_example

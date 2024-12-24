@@ -6,4 +6,4 @@
 
 - trace :: a stylus action, a map with the keys :x, :y, :pen, :pres
 - tracer :: trace the stylus actions
-- renderer :: copy the tablet screen
+- renderer :: "display" the traces on host

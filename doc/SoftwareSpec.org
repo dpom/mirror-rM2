@@ -4,41 +4,41 @@
 #+EMAIL: dan.pomohaci@gmail.com
 #+STARTUP: overview indent align inlineimages
 
-* Scop
+* Purpose
 
-    - aceasta aplicație trebuie să fie o oglindă a remarkable pe laptop
-    - tot ce scriu sau desenez pe remarkable ar trebui să apară în timp real în aplicația pe laptop inclusiv stersăturile
+- this app should mirror remarkable on your laptop
+- everything I write or draw on remarkable should appear in real time in the app on my laptop including erasures
 
 * Implementare
 
-- aplicatie clojure folosind integrant
-- componente:
-  - tracer :: urmăreste miscările făcute pe remarkable
-  - render :: randează miscările
-  - logger :: logging - folosesc =duct.logger=
-- pentru comunicarea dintre cele 2 componente principale am folosit manifold stream
-- nu vreau să folosesc records așa că nu o să folosesc nici protocols
-- oricum pâna acum nu am decât o singură functii în boundary: get-stream
-- de fapt nu am nevoie de o funcție pt ca toate componentele principale folosesc aceeași key =:stream= pt stream
-- programul principal trebuie doar sa conecteze stream-ul de la rederer la stream-ul tracer-ului
+- clojure application using integrant
+- components:
+  - tracer :: tracks moves made on remarkable
+  - render :: render the moves
+  - logger :: logging - use =duct.logger=
+- for communication between the 2 main components I used manifold stream
+- so far I have only one function in boundary : get-stream
+- in fact I don't need a function because all the main components use the same key =:stream= for stream
+- the main program just needs to connect the stream from the rederer to the tracer stream
 
 ** mirror.tracer.event
 
-- este componenta care urmăreste miscările stilus pe remarkable
-- se conectează prin ssh la remarkable și citeste toate mesajele de la =/dev/input/event1=
-- parametru de intrare:
-  - server :: adresa remarkable
-
+- is the component that tracks stylus movements on remarkable
+- connects via ssh to remarkable and reads all messages from =/dev/input/event1=
+- input parameter:
+  - server :: remarkable address
+- user and password should also be input parameters but they are not because I created a gpg key specifically for remarkable and configured ~known_hosts~ (remakable) and ssh config (host) to use it for authentication
+    
 ** mirror.tracer.file
 
-    - pentru a nu folosi de fiecare dată remarkable am implementat o componentă care citeste events stilus dintr-un fisier
-    - modulul implementează functia:
-      - trace! [filename] :: trimite către stream toate events memorate în fisierul filename
+    - to not use remarkable every time I implemented a component that reads stylus events from a file
+    - module implements the function:
+      - trace! [filename] :: send to stream all events stored in the filename file
 
 ** mirror.renderer.file
 
-- renderer care salvează Events într-un fisier
-- parametru de intrare:
-  - filename :: numele fișierului în care se salvează events
+- renderer that saves Events to a file
+- input parameter:
+  - filename :: filename of the file to save events to
 
 ** mirror.renderer.screen

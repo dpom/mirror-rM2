@@ -3,6 +3,13 @@
 
 An application to mirror the remarkable2 tablet on the pc.
 
+** Description
+
+See ~doc~ folder:
+- Dictionary :: dictionar de termeni folositi in proiect
+- SoftwareSpec :: software specification
+- RemarkableEvents :: describe the events
+
 ** Usage
 
 ** Development

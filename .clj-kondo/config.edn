@@ -1,0 +1,22 @@
+{:linters
+ {:unresolved-symbol
+  {:exclude
+   [(net.cgrand.enlive-html/defsnippet)
+    match?]}
+
+  :unresolved-var
+  {:exclude
+   [honeysql.core/format
+    honeysql.core/raw
+    honey.sql/format]}
+
+  :unused-binding
+  {:exclude-destructured-keys-in-fn-args true}
+
+  :shadowed-var
+  {:level :warning}}
+
+ :lint-as
+ {quil.core/defsketch     clojure.core/def}
+
+ :skip-comments true}
