@@ -364,3 +364,36 @@ state
 
 (process-file! state "test/resources/test1.ev")
   #+end_src
+
+* 2024-12-25
+
+- testez tot sistemul:
+  #+begin_src clojure
+(go)
+
+(keys (system))
+;; => (:duct.logger.timbre/println
+;;     [:duct/logger :duct.logger/timbre]
+;;     :mirror.renderer/screen
+;;     :mirror.tracer/file
+;;     :mirror/main)
+
+(require '[duct.logger :refer [log]]
+         '[mirror.tracer.file :refer [trace!]]
+         '[mirror.renderer.screen :as scr])
+
+
+(def tracer (:mirror.tracer/file (system)))
+
+(trace! tracer "test/resources/test2.ev")
+
+(def renderer (:mirror.renderer/screen (system)))
+
+(def state (:state renderer))
+state
+
+(trace! tracer "test/resources/test4.ev")
+
+(halt)
+
+  #+end_src

@@ -19,6 +19,7 @@
 (def scale-value 20.0)
 (def background 255)
 (def color 0)
+(def line-weight 3)
 
 
 (def colors
@@ -80,8 +81,8 @@
 (defn setup
   []
   (q/frame-rate 6) ; draw will be called 60 times per second
-  (q/background 255)
-  (q/stroke-weight 1)
+  (q/background background)
+  (q/stroke-weight line-weight)
   (q/smooth))
 
 
@@ -151,3 +152,29 @@
     (stm/close! stream)
     (.exit ^PApplet skatch)
     (log logger :info ::halt)))
+
+
+(comment
+
+  (user/go)
+
+  (keys (user/system))
+  ;; => (:duct.logger.timbre/println
+  ;;     [:duct/logger :duct.logger/timbre]
+  ;;     :mirror.renderer/screen
+  ;;     :mirror.tracer/file
+  ;;     :mirror/main)
+
+  (require '[mirror.tracer.file :as ftr])
+  
+  (def main (:mirror/main (user/system)))
+  
+  (def tracer (:tracer main))
+
+  (ftr/trace! tracer "test/resources/test1.ev")
+
+  (def renderer (:renderer main))
+
+
+  ;;
+  )
