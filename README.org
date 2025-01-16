@@ -1,4 +1,4 @@
-* mirror-rmk2
+* mirror-rM2
 
 
 An application to mirror the remarkable2 tablet on the pc.
@@ -6,7 +6,7 @@ An application to mirror the remarkable2 tablet on the pc.
 ** Description
 
 See ~doc~ folder:
-- Dictionary :: dictionar de termeni folositi in proiect
+- Dictionary :: dictionary of terms used in the project
 - SoftwareSpec :: software specification
 - RemarkableEvents :: describe the events
 
@@ -45,10 +45,12 @@ errors in code.
 
 *** REPL
 
-** Deploy
+To run REPL:
+#+begin_src clojure
+bb nrepl
+#+end_src
 
-
-** Resources
+** References
 
 
 1. https://datatracker.ietf.org/doc/html/rfc6143
@@ -65,11 +67,6 @@ errors in code.
 12. [[https://github.com/AnyTimeTraveler/pipes-and-rust][AnyTimeTraveler/pipes-and-rust]]
 
 
-
-** Tasks
-
-*** Create project scafold
-*** Bring the code from the old project 
 
 ** License
 
