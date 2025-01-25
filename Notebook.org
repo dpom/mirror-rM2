@@ -56,7 +56,6 @@
   #+end_src
   tracer functioneaza
 
-  
 * 2024-12-17
 
 - actualizez cunostiintele de quil:
@@ -395,5 +394,36 @@ state
 (trace! tracer "test/resources/test4.ev")
 
 (halt)
-
   #+end_src
+
+* 2025-01-23
+
+** #1 The screen rendering is incorrect
+
+  #+begin_src clojure
+(go)
+
+(keys (system))
+;; => (:duct.logger.timbre/println
+;;     [:duct/logger :duct.logger/timbre]
+;;     :mirror.renderer/screen
+;;     :mirror.tracer/file
+;;     :mirror/main)
+
+(require '[duct.logger :refer [log]]
+         '[mirror.tracer.file :refer [trace!]]
+         '[mirror.renderer.screen :as scr])
+
+(def main (:mirror/main (system)))
+
+(def tracer (:tracer main))
+
+(def renderer (:renderer main))
+
+(def state (:state renderer))
+state
+
+
+(halt)
+  #+end_src
+  

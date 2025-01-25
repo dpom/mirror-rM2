@@ -16,10 +16,22 @@
 
 (derive ig-key :mirror/renderer)
 
-(def scale-value 20.0)
+(def ratio (/ sch/x-max sch/y-max))
+
+
+(def screen
+  {:width 1000
+   :height 1404})
+
+
+(def x-scale (/ (:height screen) sch/x-max))
+(def y-scale (/ (:width screen) sch/y-max))
+
+
 (def background 255)
 (def color 0)
 (def line-weight 3)
+(def dist-max-display 10)
 
 
 (def colors
@@ -27,53 +39,66 @@
    :rubber background})
 
 
-(defn scale
-  [x max-x]
-  (if x
-    (Math/round (float (/ (abs (- max-x x)) scale-value)))
-    x))
+(defn get-x-screen
+  [x]
+  (when x
+    (Math/round (float (* (- sch/x-max x) x-scale)))))
 
 
-(def screen
-  {:width (scale sch/max-y 0)
-   :height (scale sch/max-x 0)})
+(defn get-y-screen
+  [y]
+  (when y
+    (Math/round (float (* y y-scale)))))
 
 
 ;; state
+
+(defn make-state
+  []
+  {:lines (atom [])
+   :current-point (atom [])
+   :current-dist (atom sch/dist-max)
+   :current-line (atom {:tool nil :points []})
+   :in-line? (atom false)})
+
 
 (defn init-state!
   [state]
   (reset! (:lines state) [])
   (reset! (:current-point state) [])
+  (reset! (:current-dist state) sch/dist-max)
   (reset! (:current-line state) {:tool nil :points []})
   (reset! (:in-line? state) false))
 
 
 (defn process-event!
-  [{:keys [lines current-point current-line in-line?] :as state}
-   {:keys [pen x y rubber]}]
-  (if @in-line?
-    (if (or (= pen 0) (= rubber 0))
-      (do
-        (swap! lines conj @current-line)
-        (reset! current-line {:tool nil :points []})
-        (reset! in-line? false))
-      (do
-        (reset! current-point [(or (scale y 0) (first @current-point))
-                               (or (scale x sch/max-x) (second @current-point))])
-        (swap! current-line assoc :points (dedupe (conj (:points @current-line) @current-point)))
-        (tap> @current-line)))
-    (cond
-      (= pen 1) (do
-                  (reset! in-line? true)
-                  (reset! current-point [(scale y 0) (scale x sch/max-x)])
-                  (reset! current-line {:tool :pen :points [@current-point]}))
-      (= rubber 1) (do
-                     (reset! in-line? true)
-                     (reset! current-point [(scale y 0) (scale x sch/max-x)])
-                     (reset! current-line {:tool :rubber :points [@current-point]}))
-      :else nil))
-  state)
+  [{:keys [state logger]}
+   {:keys [pen x y rubber dist] :as event}]
+  (log logger :debug ::process-event! event)
+  (let [{:keys [lines current-point current-line current-dist in-line?]}  state]
+    (if @in-line?
+      (if (or (= pen 0) (= rubber 0))
+        (do
+          (swap! lines conj @current-line)
+          (reset! current-line {:tool nil :points []})
+          (reset! in-line? false))
+        (do
+          (reset! current-point [(or (get-y-screen y) (first @current-point))
+                                 (or (get-x-screen x) (second @current-point))])
+          (reset! current-dist (or dist @current-dist))
+          (when (< @current-dist dist-max-display)
+            (swap! current-line assoc :points (dedupe (conj (:points @current-line) @current-point))))))
+      (cond
+        (= pen 1) (do
+                    (reset! in-line? true)
+                    (reset! current-point [(get-y-screen y) (get-x-screen x)])
+                    (reset! current-line {:tool :pen :points [@current-point]}))
+        (= rubber 1) (do
+                       (reset! in-line? true)
+                       (reset! current-point [(get-y-screen y) (get-x-screen x)])
+                       (reset! current-line {:tool :rubber :points [@current-point]}))
+        :else nil))
+    state))
 
 
 ;; UI
@@ -93,11 +118,11 @@
 
 
 (defn ui-key-press
-  [state]
+  [{:keys [state logger]}]
   (let  [raw-key (q/raw-key)
          key-code (q/key-code)]
-    (tap> {:raw-key raw-key
-           :key-code key-code})
+    (log logger :debug :ui-key-press {:raw-key raw-key
+                                      :key-code key-code})
     (case raw-key
       \c (clean state)
       nil)))
@@ -111,21 +136,22 @@
 
 
 (defn draw
-  [{:keys [lines in-line? current-line]}]
-  (doseq [l @lines]
-    (draw-line l))
-  (when @in-line?
-    (draw-line @current-line)))
+  [{:keys [state logger]}]
+  (let [{:keys [lines in-line? current-line]} state]
+    (doseq [l @lines]
+      (draw-line l))
+    (when @in-line?
+      (draw-line @current-line))))
 
 
 (defn create-sketch
-  [state]
+  [renderer]
   (q/sketch
     :title "mirror"
     :size [(:width screen) (:height screen)]
     :setup #'setup
-    :draw #(draw state)
-    :key-pressed #(ui-key-press state)
+    :draw #(draw renderer)
+    :key-pressed #(ui-key-press renderer)
     :middleware [qm/pause-on-error]))
 
 
@@ -134,30 +160,29 @@
 
 (defmethod ig/init-key ig-key [_ config]
   (let [{:keys [logger]} config
+        _ (log logger :info ::init)
         stream (stm/stream)
-        state  {:lines (atom [])
-                :current-point (atom [])
-                :current-line (atom {:tool nil :points []})
-                :in-line? (atom false)}]
-    (stm/consume #(process-event! state %) stream)
-    (log logger :info ::init)
-    {:stream stream
-     :state state
-     :logger logger
-     :skatch (create-sketch state)}))
+        state  (make-state)
+        renderer {:stream stream
+                  :state state
+                  :logger logger}
+        sketch (create-sketch renderer)]
+    (stm/consume #(process-event! renderer %) stream)
+    (assoc renderer :sketch sketch)))
 
 
 (defmethod ig/halt-key! ig-key [_ sys]
-  (let [{:keys [stream logger skatch]} sys]
+  (let [{:keys [stream logger sketch]} sys]
     (stm/close! stream)
-    (.exit ^PApplet skatch)
+    (.exit ^PApplet sketch)
     (log logger :info ::halt)))
 
 
 (comment
+  (require '[user :as user])
 
   (user/go)
-
+  
   (keys (user/system))
   ;; => (:duct.logger.timbre/println
   ;;     [:duct/logger :duct.logger/timbre]
@@ -165,16 +190,18 @@
   ;;     :mirror.tracer/file
   ;;     :mirror/main)
 
-  (require '[mirror.tracer.file :as ftr])
-  
-  (def main (:mirror/main (user/system)))
-  
-  (def tracer (:tracer main))
+  (require '[mirror.tracer.file :refer [trace!]])
 
-  (ftr/trace! tracer "test/resources/test1.ev")
+  (def main (:mirror/main (system)))
+
+  (def tracer (:tracer main))
 
   (def renderer (:renderer main))
 
+  (def state (:state renderer))
+  state
+
+  (user/halt)
 
   ;;
   )

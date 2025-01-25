@@ -22,10 +22,9 @@
   {0  :x
    1  :y
    24 :pres
-   25 :noop ; dist
-   26 :noop ; xtilt
-   27 :noop ; ytilt
-   })
+   25 :dist
+   26 :xtilt
+   27 :ytilt})
 
 
 (def key-codes
@@ -108,11 +107,11 @@
                    :out
                    out->stream
                    format-events)
-        sys {:proc proc
-             :logger logger
-             :stream stream}]
+        tracer {:proc proc
+                :logger logger
+                :stream stream}]
     (log logger :info ::init)
-    sys))
+    tracer))
 
 
 (defmethod ig/halt-key! ig-key [_ sys]

@@ -3,10 +3,10 @@
                :renderer #ig/ref :mirror/renderer
                :logger #ig/ref :duct/logger}
 
- ;; :mirror.tracer/event {:server "remarkable"
- ;;                       :logger #ig/ref :duct/logger}
+ :mirror.tracer/event {:server "remarkable"
+                       :logger #ig/ref :duct/logger}
 
- :mirror.tracer/file {:logger #ig/ref :duct/logger}
+ ;; :mirror.tracer/file {:logger #ig/ref :duct/logger}
 
  :mirror.renderer/screen {:logger #ig/ref :duct/logger}
 

@@ -1,13 +1,14 @@
 (ns mirror.schema)
 
+(def y-max 15725)
+(def x-max 20967)
+(def pres-max 4095)
+(def dist-max 100)
 
-(def max-x 20967)
-
-(def X [:int {:min 0 :max max-x}])
-
-(def max-y 15725)
-
-(def Y [:int {:min 0 :max max-y}])
+(def X [:int {:min 0 :max x-max}])
+(def Y [:int {:min 0 :max y-max}])
+(def PRES [:int {:min 0 :max pres-max}])
+(def DIST [:int {:min 0 :max dist-max}])
 
 
 (def Point

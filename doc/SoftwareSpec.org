@@ -9,7 +9,7 @@
 - this app should mirror remarkable on your laptop
 - everything I write or draw on remarkable should appear in real time in the app on my laptop including erasures
 
-* Implementare
+* Implementation
 
 - clojure application using integrant
 - components:
@@ -31,9 +31,9 @@
     
 ** mirror.tracer.file
 
-    - to not use remarkable every time I implemented a component that reads stylus events from a file
-    - module implements the function:
-      - trace! [filename] :: send to stream all events stored in the filename file
+- to not use remarkable every time I implemented a component that reads stylus events from a file
+- module implements the function:
+  - trace! [filename] :: send to stream all events stored in the filename file
 
 ** mirror.renderer.file
 
