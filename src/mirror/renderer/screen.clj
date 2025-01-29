@@ -32,6 +32,7 @@
 (def color 0)
 (def line-weight 3)
 (def dist-max-display 10)
+(def smooth-bin-length 5)
 
 
 (def colors
@@ -51,6 +52,39 @@
     (Math/round (float (* y y-scale)))))
 
 
+(defn mean
+  [coll]
+  (let [sum (apply + coll)
+        len (count coll)]
+    (if (pos? len)
+      (int (/ sum len))
+      0)))
+
+
+(defn median
+  [coll]
+  (let [sorted (sort coll)
+        cnt (count sorted)
+        halfway (quot cnt 2)]
+    (if (odd? cnt)
+      (nth sorted halfway) ; (1)
+      (let [bottom (dec halfway)
+            bottom-val (nth sorted bottom)
+            top-val (nth sorted halfway)]
+        (mean [bottom-val top-val])))))
+
+
+(defn smooth-line
+  [line]
+  (let [points (:points line)
+        smooth-bins (partition-all smooth-bin-length points)]
+    (assoc line :points
+           (map (fn [bin]
+                  [(median (map first bin))
+                   (median (map second bin))])
+                smooth-bins))))
+
+
 ;; state
 
 (defn make-state
@@ -58,6 +92,7 @@
   {:lines (atom [])
    :current-point (atom [])
    :current-dist (atom sch/dist-max)
+   :current-touch (atom 0)
    :current-line (atom {:tool nil :points []})
    :in-line? (atom false)})
 
@@ -67,26 +102,28 @@
   (reset! (:lines state) [])
   (reset! (:current-point state) [])
   (reset! (:current-dist state) sch/dist-max)
+  (reset! (:current-touch state) 0)
   (reset! (:current-line state) {:tool nil :points []})
   (reset! (:in-line? state) false))
 
 
 (defn process-event!
   [{:keys [state logger]}
-   {:keys [pen x y rubber dist] :as event}]
+   {:keys [pen x y rubber dist touch] :as event}]
   (log logger :debug ::process-event! event)
-  (let [{:keys [lines current-point current-line current-dist in-line?]}  state]
+  (let [{:keys [lines current-point current-line current-dist current-touch in-line?]}  state]
     (if @in-line?
       (if (or (= pen 0) (= rubber 0))
         (do
-          (swap! lines conj @current-line)
+          (swap! lines conj (smooth-line @current-line))
           (reset! current-line {:tool nil :points []})
           (reset! in-line? false))
         (do
           (reset! current-point [(or (get-y-screen y) (first @current-point))
                                  (or (get-x-screen x) (second @current-point))])
           (reset! current-dist (or dist @current-dist))
-          (when (< @current-dist dist-max-display)
+          (reset! current-touch (or touch @current-touch))
+          (when (and (= @current-touch 1) (< @current-dist dist-max-display))
             (swap! current-line assoc :points (dedupe (conj (:points @current-line) @current-point))))))
       (cond
         (= pen 1) (do
@@ -190,9 +227,7 @@
   ;;     :mirror.tracer/file
   ;;     :mirror/main)
 
-  (require '[mirror.tracer.file :refer [trace!]])
-
-  (def main (:mirror/main (system)))
+  (def main (:mirror/main (user/system)))
 
   (def tracer (:tracer main))
 

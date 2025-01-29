@@ -427,3 +427,61 @@ state
 (halt)
   #+end_src
   
+* 2025-01-29
+
+- adaug touch
+  #+begin_src clojure
+  ;; 2025-01-29
+
+  (def line (first @(:lines state)))
+
+  (def points (:points line))
+
+  (def smooth-bin-length 10)
+
+  (def smooth-bin (first
+                    (partition-all smooth-bin-length points)))
+  
+  (def item (map first smooth-bin))
+  item
+  ;; => (633 245 245 245 245 245 245 245 245 247)
+  
+  (defn mean [coll]
+    (let [sum (apply + coll)
+          count (count coll)]
+      (if (pos? count)
+        (int (/ sum count))
+        0)))
+
+  (mean item)
+  ;; => 284
+
+  (defn median [coll]
+    (let [sorted (sort coll)
+          cnt (count sorted)
+          halfway (quot cnt 2)]
+      (if (odd? cnt)
+        (nth sorted halfway) ; (1)
+        (let [bottom (dec halfway)
+              bottom-val (nth sorted bottom)
+              top-val (nth sorted halfway)]
+          (mean [bottom-val top-val])))))
+
+  (median item)
+  ;; => 245
+  
+  (defn smooth-line
+    [line]
+    (let [points (:points line)
+          smooth-bins (partition-all smooth-bin-length points)]
+      (assoc line :points
+             (map (fn [bin]
+                    [(median (map first bin))
+                     (median (map second bin))])
+                  smooth-bins))))
+
+  (smooth-line line)
+  ;; => {:tool :pen, :points ([245 410] [245 428])}
+  
+
+  #+end_src
