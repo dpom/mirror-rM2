@@ -26,6 +26,6 @@
                                    (when-not (empty? tst-ns) (str " --focus " tst-ns)))))}
   libupdate {:doc  "Check for newer libraries"
              :task (clojure "-X:outdated")}
-  deploy    {:doc  "Build and deploy jar"
-             :task (clojure "-T:build deploy")}
+  build     {:doc  "Build jar"
+             :task (clojure "-T:slim build")}
   }}

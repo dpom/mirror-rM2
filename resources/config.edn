@@ -3,19 +3,18 @@
                :renderer #ig/ref :mirror/renderer
                :logger #ig/ref :duct/logger}
 
- ;; :mirror.tracer/event {:server "remarkable"
- ;;                       :logger #ig/ref :duct/logger}
+ :mirror.tracer/event {:server #or [#env MIRROR_RM2_HOST "remarkable"]
+                       :logger #ig/ref :duct/logger}
 
- :mirror.tracer/file {:logger #ig/ref :duct/logger}
+ ;; :mirror.tracer/file {:logger #ig/ref :duct/logger}
 
- :mirror.renderer/screen {:logger #ig/ref :duct/logger}
+ :mirror.renderer/screen {:scale-value #double #or [#env MIRROR_RM2_SCALE_VALUE 20.0]
+                          :logger #ig/ref :duct/logger}
 
  ;; :mirror.renderer/file {:filename "test/resources/test.ev"
  ;;                        :logger #ig/ref :duct/logger}
 
- [:duct/logger :duct.logger/timbre] {:level #profile {:prod :info
-                                                      :dev  :debug
-                                                      :test :info}
+ [:duct/logger :duct.logger/timbre] {:level #keyword #or [#env MIRROR_RM2_LOG_LEVEL "info"] 
                                      :appenders {:println #ig/ref :duct.logger.timbre/println}}
 
  :duct.logger.timbre/println {}}

@@ -30,9 +30,11 @@ See ~doc~ folder:
 **** One-time setup
 
 On Linux, MacOS, and Windows (WSL2):
-#+begin_src shell
+1. Create an =.envrc.local= file (see =.envrc.local.example=)
+2. Activate =direnv=:
+   #+begin_src shell
 direnv allow
-#+end_src
+   #+end_src
 
 To make sure that no unformatted commits with lint errors end up in the
 main branch run initially:
