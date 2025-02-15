@@ -1,0 +1,3 @@
+export MIRROR_RM2_HOST="remarkable"
+export MIRROR_RM2_SCALE_VALUE=20.0
+export MIRROR_RM2_LOG_LEVEL="debug"
