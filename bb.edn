@@ -29,5 +29,5 @@
   build     {:doc  "Build jar"
              :task (clojure "-T:slim build")}
   app       {:doc  "Run the application"
-             :task "java -jar target/mirror-rM2.jar"}
+             :task (shell "java -jar target/mirror-rM2.jar")}
   }}

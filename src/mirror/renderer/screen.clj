@@ -71,13 +71,15 @@
 ;; state
 
 (defn make-state
-  []
+  [scale-value logger]
   {:lines (atom [])
    :current-point (atom [])
    :current-dist (atom sch/dist-max)
    :current-touch (atom 0)
    :current-line (atom {:tool nil :points []})
-   :in-line? (atom false)})
+   :in-line? (atom false)
+   :scale-value scale-value
+   :logger logger})
 
 
 (defn init-state!
@@ -141,7 +143,7 @@
 
 
 (defn ui-key-press
-  [{:keys [state logger]}]
+  [state]
   (let  [raw-key (q/raw-key)
          key-code (q/key-code)]
     (log (:logger state) :debug ::key-pressed {:raw-key raw-key
@@ -159,12 +161,11 @@
 
 
 (defn draw
-  [{:keys [state logger]}]
-  (let [{:keys [lines in-line? current-line]} state]
-    (doseq [l @lines]
-      (draw-line l))
-    (when @in-line?
-      (draw-line @current-line))))
+  [{:keys [lines in-line? current-line]}]
+  (doseq [l @lines]
+    (draw-line l))
+  (when @in-line?
+    (draw-line @current-line)))
 
 
 (defn create-sketch
@@ -185,12 +186,7 @@
 (defmethod ig/init-key ig-key [_ config]
   (let [{:keys [logger scale-value]} config
         stream (stm/stream)
-        state  {:scale-value scale-value
-                :logger logger
-                :lines (atom [])
-                :current-point (atom [])
-                :current-line (atom {:tool nil :points []})
-                :in-line? (atom false)}]
+        state  (make-state scale-value logger)]
     (stm/consume #(process-event! state %) stream)
     (log logger :info ::init)
     (log logger :debug ::state state)
