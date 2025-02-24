@@ -56,7 +56,9 @@
                              :verbose   false
                              :upgrade   false
                              :force     false}}
-  :neil     {:project {:name    mirror-rmk2 
-                       :version "0.1"}}
+  :slim     {:deps       {io.github.abogoyavlensky/slim {:mvn/version "LATEST"}}
+             :ns-default slim.app
+             :exec-args  {:main-ns mirror.main
+                          :uber-file "target/mirror-rM2.jar"}}
   }
  }

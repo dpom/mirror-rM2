@@ -16,18 +16,6 @@
 
 (derive ig-key :mirror/renderer)
 
-(def ratio (/ sch/x-max sch/y-max))
-
-
-(def screen
-  {:width 1000
-   :height 1404})
-
-
-(def x-scale (/ (:height screen) sch/x-max))
-(def y-scale (/ (:width screen) sch/y-max))
-
-
 (def background 255)
 (def color 0)
 (def line-weight 3)
@@ -38,18 +26,6 @@
 (def colors
   {:pen color
    :rubber background})
-
-
-(defn get-x-screen
-  [x]
-  (when x
-    (Math/round (float (* (- sch/x-max x) x-scale)))))
-
-
-(defn get-y-screen
-  [y]
-  (when y
-    (Math/round (float (* y y-scale)))))
 
 
 (defn mean
@@ -85,6 +61,13 @@
                 smooth-bins))))
 
 
+(defn scale
+  [scale-value x max-x]
+  (if x
+    (Math/round (float (/ (abs (- max-x x)) scale-value)))
+    x))
+
+
 ;; state
 
 (defn make-state
@@ -108,10 +91,14 @@
 
 
 (defn process-event!
-  [{:keys [state logger]}
+  [{:keys [scale-value lines
+           current-point current-line
+           current-dist current-touch
+           in-line? logger]
+    :as state}
    {:keys [pen x y rubber dist touch] :as event}]
   (log logger :debug ::process-event! event)
-  (let [{:keys [lines current-point current-line current-dist current-touch in-line?]}  state]
+  (let [scf (partial scale scale-value)]
     (if @in-line?
       (if (or (= pen 0) (= rubber 0))
         (do
@@ -119,8 +106,8 @@
           (reset! current-line {:tool nil :points []})
           (reset! in-line? false))
         (do
-          (reset! current-point [(or (get-y-screen y) (first @current-point))
-                                 (or (get-x-screen x) (second @current-point))])
+          (reset! current-point [(or (scf y 0) (first @current-point))
+                                 (or (scf x sch/x-max) (second @current-point))])
           (reset! current-dist (or dist @current-dist))
           (reset! current-touch (or touch @current-touch))
           (when (and (= @current-touch 1) (< @current-dist dist-max-display))
@@ -128,12 +115,11 @@
       (cond
         (= pen 1) (do
                     (reset! in-line? true)
-                    (reset! current-point [(get-y-screen y) (get-x-screen x)])
+                    (reset! current-point [(scf y 0) (scf x sch/x-max)])
                     (reset! current-line {:tool :pen :points [@current-point]}))
         (= rubber 1) (do
                        (reset! in-line? true)
-                       (reset! current-point [(get-y-screen y) (get-x-screen x)])
-                       (reset! current-line {:tool :rubber :points [@current-point]}))
+                       (reset! current-point [(scf y 0) (scf x sch/x-max)]))
         :else nil))
     state))
 
@@ -158,8 +144,8 @@
   [{:keys [state logger]}]
   (let  [raw-key (q/raw-key)
          key-code (q/key-code)]
-    (log logger :debug :ui-key-press {:raw-key raw-key
-                                      :key-code key-code})
+    (log (:logger state) :debug ::key-pressed {:raw-key raw-key
+                                               :key-code key-code})
     (case raw-key
       \c (clean state)
       nil)))
@@ -182,30 +168,36 @@
 
 
 (defn create-sketch
-  [renderer]
-  (q/sketch
-    :title "mirror"
-    :size [(:width screen) (:height screen)]
-    :setup #'setup
-    :draw #(draw renderer)
-    :key-pressed #(ui-key-press renderer)
-    :middleware [qm/pause-on-error]))
+  [state]
+  (let [scf (partial scale (:scale-value state))]
+    (q/sketch
+      :title "mirror"
+      :size [(scf sch/y-max 0) (scf sch/x-max 0)]
+      :setup #'setup
+      :draw #(draw state)
+      :key-pressed #(ui-key-press state)
+      :middleware [qm/pause-on-error])))
 
 
 ;; integrant methods
 
 
 (defmethod ig/init-key ig-key [_ config]
-  (let [{:keys [logger]} config
-        _ (log logger :info ::init)
+  (let [{:keys [logger scale-value]} config
         stream (stm/stream)
-        state  (make-state)
-        renderer {:stream stream
-                  :state state
-                  :logger logger}
-        sketch (create-sketch renderer)]
-    (stm/consume #(process-event! renderer %) stream)
-    (assoc renderer :sketch sketch)))
+        state  {:scale-value scale-value
+                :logger logger
+                :lines (atom [])
+                :current-point (atom [])
+                :current-line (atom {:tool nil :points []})
+                :in-line? (atom false)}]
+    (stm/consume #(process-event! state %) stream)
+    (log logger :info ::init)
+    (log logger :debug ::state state)
+    {:stream stream
+     :state state
+     :logger logger
+     :skatch (create-sketch state)}))
 
 
 (defmethod ig/halt-key! ig-key [_ sys]
